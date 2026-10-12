@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ManaFlow</title>
+<link rel="icon" href="logo.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#050c17">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#050c17;--panel:rgba(9,24,40,.9);--line:#143553;--line2:#1a3d5c;--ink:#d8f2ff;--dim:#9bbdd3;--dim2:#6f93ad;--cyan:#35dcff;--green:#3ee08f;--amber:#ffb547;--orange:#ff8a3d;--red:#ff5470;--violet:#b46bff;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(1200px 500px at 15% -10%,#0b2a4a 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font:13px 'IBM Plex Sans',system-ui,sans-serif}
+button{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.h{font-family:Saira,sans-serif;font-weight:700}
+.wrap{padding:14px 16px 20px;display:flex;flex-direction:column;gap:12px;max-width:1800px;margin:0 auto}
+.top{display:flex;align-items:center;gap:16px;min-width:0}
+.brand{display:flex;flex-direction:column;gap:8px;flex:0 1 330px;min-width:0}
+.brand img{height:64px;width:auto;max-width:100%;align-self:flex-start;border-radius:6px}
+nav{display:flex;flex-wrap:nowrap;gap:6px;flex:1 1 auto;min-width:0;overflow-x:auto;padding:2px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:76px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:rgba(9,24,40,.7);color:#9bc6e0}
+.tab.on{border-color:var(--cyan);background:linear-gradient(180deg,#0f4a78,#0a2440);color:#e9fbff;box-shadow:0 0 14px rgba(53,220,255,.35)}
+.search{display:flex;align-items:center;gap:8px;border:1px solid #1d6f9a;background:#061626;border-radius:8px;padding:8px 12px}
+.search input{flex:1;min-width:0;background:transparent;border:0;outline:none;color:#e6f7ff;font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+aside.side{flex:1 1 220px;max-width:100%;display:flex;flex-direction:column;gap:4px;background:rgba(9,24,40,.85);border:1px solid var(--line);border-radius:10px;padding:10px}
+.sec{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;cursor:pointer;padding:10px 6px 4px;font:700 12px Saira,sans-serif;color:var(--cyan);letter-spacing:.12em;text-align:left}
+.sec:first-child{padding-top:2px}
+.sec+.sec,.secb{border-top:1px solid var(--line)}
+.sec .ar{width:10px;color:var(--dim2)}.sec .sum{margin-left:auto;font:400 11px 'IBM Plex Mono',monospace;letter-spacing:0;color:var(--dim2)}
+.badge{font:400 10px 'IBM Plex Mono',monospace;letter-spacing:0;color:var(--dim2);border:1px solid var(--line2);border-radius:4px;padding:1px 5px}
+.vi{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:6px;border:0;cursor:pointer;text-align:left;background:transparent;color:#c8e6f7;width:100%}
+.vi.on{background:linear-gradient(90deg,#0f4a78,#0a2440);color:#fff}
+.vi .mono{color:#8db3cc}
+.cdj{background:#02070d;border:1px solid var(--line2);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;max-height:420px;overflow-y:auto}
+.pl{display:flex;align-items:center;gap:7px;width:100%;padding:8px;border:0;border-bottom:1px solid #0c1d2e;cursor:pointer;text-align:left;background:transparent;color:#e3f2fb}
+.pl.on{background:#1060b0;color:#fff;box-shadow:inset 3px 0 0 var(--cyan)}
+.pl .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.chk{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer}
+.chk input{accent-color:var(--cyan)}
+.btn{border:1px solid #1d6f9a;background:#0a2238;border-radius:6px;padding:7px 12px;cursor:pointer;color:#bfefff}
+.btn:hover{border-color:var(--cyan)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.go{border-color:var(--green);background:#0f3a28;color:#8ff0bf}
+.btn.pri{border-color:var(--cyan);background:#0f3b5f;color:#e9fbff}
+main{flex:3 1 560px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{border:1px solid var(--line2);background:#081a2c;color:#b7d3e6;border-radius:999px;padding:5px 11px;cursor:pointer}
+.tablewrap{overflow:auto;max-height:calc(100vh - 230px);min-height:320px;border:1px solid var(--line);border-radius:10px;background:rgba(6,18,31,.9)}
+table{width:100%;min-width:820px;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;z-index:1;background:#0c2440;color:#66e7ff;text-align:left;font-size:12px;padding:9px 6px;cursor:pointer;white-space:nowrap;user-select:none}
+th:first-child,td:first-child{padding-left:10px}
+td{padding:6px;border-top:1px solid #0f2a44;color:#b7d3e6;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+td.t{color:#eaf8ff;font-weight:500}
+tr.r{cursor:pointer}tr.r:hover{background:rgba(16,96,176,.18)}
+tr.sel{background:linear-gradient(90deg,#0b5fa6,#0a3a66)!important}
+tr.gone td{opacity:.55}
+.keychip{display:inline-block;min-width:34px;text-align:center;font-weight:600;font-size:12px;border-radius:5px;padding:2px 6px;color:#061220}
+.pill{display:inline-block;min-width:34px;text-align:center;font:12px 'IBM Plex Mono',monospace;border-radius:5px;padding:2px 6px}
+aside.detail{flex:1 1 330px;max-width:100%;display:flex;flex-direction:column;gap:10px}
+.art{width:118px;height:118px;flex:none;border-radius:6px;display:flex;align-items:flex-end}
+.art span{font:800 13px Saira,sans-serif;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);padding:8px;line-height:1.1;overflow:hidden;max-height:100%}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-content:start;min-width:0}
+.kv>span:nth-child(odd){color:#7fa6c2}
+.wave{height:70px;display:flex;align-items:center;gap:2px;background:#030d18;border:1px solid #10324f;border-radius:6px;padding:0 6px;overflow:hidden;cursor:pointer;position:relative}
+.wave i{flex:1;min-width:1px;border-radius:1px}
+.pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.pad{cursor:pointer;background:#061626;display:flex;align-items:center;justify-content:center;height:30px;border-radius:6px;font:12px 'IBM Plex Mono',monospace;border:1px solid var(--line2);color:#3e6582}
+.verdict{border-radius:6px;padding:7px 10px;font-size:12px}
+.path{font:11px 'IBM Plex Mono',monospace;color:var(--dim2);word-break:break-all}
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.ring{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.ring>div{border-radius:50%;background:#071628;display:flex;align-items:center;justify-content:center}
+.bar{height:8px;background:#10324f;border-radius:4px;overflow:hidden}.bar>span{display:block;height:100%}
+.notice{border-radius:10px;padding:10px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.notice.inbox{border:1px solid var(--cyan);background:linear-gradient(90deg,rgba(15,59,95,.6),rgba(9,24,40,.9))}
+.notice.job{border:1px solid var(--line2);background:var(--panel)}
+.notice .grow{flex:1 1 260px;min-width:0}
+.prog{height:6px;background:#10324f;border-radius:3px;overflow:hidden;margin-top:6px;max-width:420px}.prog>div{height:100%;background:var(--cyan);transition:width .3s}
+.modal{position:fixed;inset:0;background:rgba(2,6,12,.7);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal>.panel{width:min(640px,100%);max-height:85vh;display:flex;flex-direction:column;gap:8px}
+.dirs{overflow-y:auto;border:1px solid var(--line2);border-radius:6px;background:#02070d;flex:1;min-height:200px}
+.dirs button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #0c1d2e;padding:7px 10px;cursor:pointer;color:#e3f2fb}
+.dirs button:hover{background:#0b2a4a}
+.set{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:820px}
+.set h3{margin:0 0 6px;font:700 15px Saira,sans-serif;color:var(--cyan)}
+.set p{margin:4px 0;color:var(--dim)}
+input[type=text],select{background:#061626;border:1px solid #1d6f9a;border-radius:6px;color:#e6f7ff;padding:7px 9px;font:inherit}
+.muted{color:var(--dim2);font-size:11px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0f3b5f;border:1px solid var(--cyan);border-radius:8px;padding:10px 16px;z-index:20;max-width:90vw}
+
+.deck{display:flex;flex-direction:column;gap:10px;padding:12px 14px}
+.deckTop{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.transport{display:flex;gap:8px;align-items:center}
+.tbtn{width:44px;height:44px;border-radius:50%;border:1px solid #1d6f9a;background:#0a2238;color:#bfefff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.tbtn.big{width:56px;height:56px;border-color:var(--green);color:var(--green);box-shadow:0 0 14px rgba(62,224,143,.25)}
+.tbtn.big.on{background:#0f3a28}
+.tbtn[disabled]{opacity:.4;cursor:not-allowed}
+.dinfo{flex:1 1 260px;min-width:0}.dinfo .h{font-size:20px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dstats{display:grid;grid-template-columns:repeat(4,auto);gap:0 14px;align-items:baseline;font-size:12px;color:var(--dim2)}
+.dstats b{font-size:20px;color:var(--ink);font-weight:500}
+.bigwave{position:relative;height:150px;background:#02070d;border:1px solid #10324f;border-radius:8px;cursor:crosshair;overflow:hidden}
+.bigwave canvas{position:absolute;inset:0;display:block}
+.wmsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim2);font-size:12px;pointer-events:none;text-align:center;padding:0 16px}
+.deckPads{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+.hpad{height:46px;border-radius:8px;border:1px solid var(--line2);background:#061626;color:#3e6582;font:600 15px 'IBM Plex Mono',monospace;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.hpad small{font:400 10px 'IBM Plex Mono',monospace;opacity:.85}
+.hpad:hover{border-color:var(--cyan)}
+@media (max-width:700px){.deckPads{grid-template-columns:repeat(4,minmax(0,1fr))}.bigwave{height:110px}}
+
+th.cb,td.cb{width:30px;padding-left:10px!important;padding-right:0}
+td.cb input,th.cb input{accent-color:var(--cyan);width:15px;height:15px;cursor:pointer}
+td.menu{width:34px;padding:0 6px}
+.dots{background:none;border:1px solid transparent;border-radius:6px;color:#8db3cc;cursor:pointer;padding:2px 8px;font-size:16px;line-height:1}
+.dots:hover{border-color:var(--line2);color:#fff}
+.rmenu{position:fixed;z-index:30;background:#0b1d31;border:1px solid var(--line2);border-radius:8px;padding:4px;min-width:220px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.rmenu button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:8px 10px;cursor:pointer;color:#e3f2fb}
+.rmenu button:hover{background:#12406b}.rmenu button[disabled]{opacity:.4;cursor:not-allowed}
+.rmenu hr{border:0;border-top:1px solid var(--line2);margin:4px 0}
+.bulk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1px solid var(--cyan);background:#0a2a44;border-radius:8px;padding:6px 10px}
+.bv{display:flex;justify-content:space-between;gap:8px;padding:5px 8px 5px 18px;border-radius:6px;border:0;cursor:pointer;text-align:left;background:transparent;color:#c8e6f7;width:100%;font-size:12.5px}
+.bv.on{background:linear-gradient(90deg,#0f4a78,#0a2440);color:#fff}
+.bgh{font:600 11px 'IBM Plex Mono',monospace;color:var(--dim2);padding:6px 8px 2px;letter-spacing:.06em}
+.notice.usb{border:1px solid var(--amber);background:linear-gradient(90deg,rgba(90,61,12,.55),rgba(9,24,40,.9))}
+.usbrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:6px 8px;border-radius:6px;background:rgba(2,7,13,.5);cursor:pointer;width:100%}
+.form{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 10px;align-items:center}
+.form input{width:100%}
+.bpmbtn{border:1px solid var(--line2);background:#061626;color:#9bbdd3;border-radius:4px;padding:0 6px;font:11px 'IBM Plex Mono',monospace;cursor:pointer;margin-left:6px}
+.art img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:block}
+.art{position:relative;overflow:hidden}.art img{position:absolute;inset:0}
+.dart{width:56px;height:56px;border-radius:6px;flex:none;position:relative;overflow:hidden}
+.dart img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+.mpanes{display:none}
+.m-artist{display:none}
+@media (max-width:820px){
+ .mpanes{display:flex;gap:6px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+ .mpanes button{flex:1;border:1px solid var(--line2);background:#081a2c;color:#b7d3e6;border-radius:999px;padding:9px 6px;font-size:14px;cursor:pointer}
+ .mpanes button.on{border-color:var(--cyan);color:#fff;background:#0f3b5f}
+ body.m-tracks aside.side, body.m-tracks aside.detail{display:none}
+ body.m-side main, body.m-side aside.detail{display:none}
+ body.m-detail main, body.m-detail aside.side{display:none}
+ .bigwave{height:96px} .deck .muted.hint{display:none} .dstats b{font-size:17px} .tbtn.big{width:52px;height:52px}
+ table{min-width:0} .c-genre,.c-length,.c-type,.c-artist,.c-status{display:none}
+ .m-artist{display:block;font-weight:400;color:#8db3cc;font-size:12px;overflow:hidden;text-overflow:ellipsis}
+ td.t{max-width:46vw;white-space:normal} tr.r td{padding-top:9px;padding-bottom:9px}
+ .tablewrap{max-height:none}
+ .hpad{height:52px}
+}
+@media (max-width:900px){.top{flex-direction:column;align-items:stretch}.brand{flex-basis:auto}nav{width:100%}}
+@media (max-width:700px){.brand img{height:48px}.tab{min-width:60px;padding:6px}.tab span{font-size:11px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="top">
+    <div class="brand"><img src="logo.png" alt="ManaFlow — One library. One flow.">
+    <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#35dcff" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" placeholder="Search tracks, artists, genres…" aria-label="Search tracks"></label></div>
+    <nav id="tabs" aria-label="Sections"></nav>
+  </div>
+  <div id="notices"></div>
+  <div id="deck"></div>
+  <div id="view"></div>
+</div>
+<input type="file" id="xmlfile" accept=".xml" hidden>
+<input type="file" id="dirpick" webkitdirectory multiple hidden>
+<input type="file" id="filepick" accept="audio/*,.mp3,.wav,.aiff,.aif,.flac,.m4a" multiple hidden>
+<input type="file" id="restorefile" accept=".json" hidden>
+<script src="engine.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Number(n||0).toLocaleString('en-US');
+const IS_TOUCH=matchMedia('(pointer: coarse)').matches;
+const SER=()=>SUM&&SUM.settings.show_serato==='1';
+const COLORS={'Ready':'#3ee08f','Some Cues':'#ffb547','No Cues':'#ff8a3d','Needs Analysis':'#ff5470'};
+const TABS=[['Library','M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'],['Analyze','M3 12h3l3-8 4 16 3-8h5'],['Cues','M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],['Convert','M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M20 4v5h-5M4 20v-5h5'],['Export','M12 15V3M7 8l5-5 5 5M4 21h16'],['Tools','M14 7l3-3 3 3-3 3M3 21l9-9'],['Settings','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2v3M12 19v3M2 12h3M19 12h3']];
+let saved={}; try{saved=JSON.parse(localStorage.getItem('mf_ui')||'{}')}catch(e){}
+const S=Object.assign({tab:'Library',view:'all',pl:null,status:'All',q:'',sort:'',desc:false,drivesOff:[],shut:{},open:{},sel:null,browse:null,genre:''},saved,{sel:null,q:''});
+let SUM=null, ROWS=[], TOTAL=0, CUR=null, WAVE=null, inboxDismissed=false, SEL=new Set(), USBD=null, usbOpen=false, usbOff={};
+const audio=new Audio(); audio.preload='none';
+function persist(){try{const {tab,view,pl,status,sort,desc,drivesOff,shut,open,browse,genre}=S;localStorage.setItem('mf_ui',JSON.stringify({tab,view,pl,status,sort,desc,drivesOff,shut,open,browse,genre}))}catch(e){}}
+async function api(path,opt){return MF.handle((opt&&opt.method)||'GET',path,opt&&opt.body)}
+const post=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});
+function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),4000)}
+const keyColor=k=>{const n=parseInt(k,10);return isNaN(n)?null:`hsl(${(n-1)*30} 75% 55%)`};
+const bpmShow=(b,auto)=>{if(!b)return{t:'—',half:false};return{t:String(Math.round(b*10)/10),half:auto==1}};
+const len=s=>{if(!s)return'—';s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`};
+const pill=(n,unknown)=>{const c=unknown?'#4f6f88':n>=8?'#3ee08f':!n?'#ff8a3d':'#ffb547';return `<span class="pill" style="color:${c};border:1px solid ${c}55;background:${c}14">${unknown?'—':(n||0)+'/8'}</span>`};
+
+function renderTabs(){$('#tabs').innerHTML=TABS.map(([n,i])=>`<button class="tab${S.tab===n?' on':''}" data-tab="${n}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="${i}"/></svg><span>${n}</span></button>`).join('')}
+$('#tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;S.tab=b.dataset.tab;persist();render()};
+let qt;$('#q').oninput=e=>{clearTimeout(qt);qt=setTimeout(()=>{S.q=e.target.value;loadTracks()},200)};
+
+function notices(){
+  const out=[];const j=SUM&&SUM.job;
+  if(SUM&&SUM.needsReconnect)out.push(`<div class="notice inbox"><div class="grow"><div class="h" style="color:#bfefff">Reconnect your music folders</div><div style="color:#c8ddea;font-size:12px">For your privacy the browser asks again each visit before ManaFlow can read your music.</div></div><button class="btn pri" data-act="reconnect">Reconnect</button></div>`);
+  if(SUM&&!SUM.canPick)out.push(`<div class="notice job"><div class="grow"><div class="h" style="color:#ffd38a">${IS_TOUCH?'Phone mode':'Best in Chrome or Edge on your PC'}</div><div style="color:#c8ddea;font-size:12px">${IS_TOUCH?'Phones can\'t open whole folders. Tap + Add location to pick music files; they link to your library by file name and play for this visit.':'This browser can browse your library, but only Chrome and Edge can remember your music folders, play from them and write Serato crates.'}</div></div></div>`);
+  if(SUM&&!SUM.views[0].count)out.push(`<div class="notice inbox"><div class="grow"><div class="h" style="color:#bfefff">Welcome to ManaFlow</div><div style="color:#c8ddea;font-size:12px">1. Import your rekordbox XML (rekordbox: File → Export Collection in xml format). 2. Click + Add location and pick your music folder, so tracks can play. Everything stays on this computer.</div></div><button class="btn pri" data-act="importxml">Import rekordbox XML</button><button class="btn" data-act="addroot">+ Add location</button></div>`);
+  if(j&&j.running){const pct=(j.phase==='analyzing'||j.phase==='finding duplicates'||j.phase==='converting')&&j.probe_total?Math.round(100*j.probed/j.probe_total):null;
+    out.push(`<div class="notice job"><div class="grow"><div class="h" style="color:#bfefff">${j.phase==='analyzing'?`Analyzing ${fmt(j.probed)} of ${fmt(j.probe_total)}`:j.phase==='finding duplicates'?`Finding duplicates… ${fmt(j.probed)} of ${fmt(j.probe_total)} checked`:j.phase==='converting'?`Converting ${fmt(j.probed)} of ${fmt(j.probe_total)}`:`Scanning… ${fmt(j.found)} audio files found`}</div>
+    <div class="muted">${fmt(j.new)} new · ${fmt(j.changed)} changed · ${fmt(j.skipped)} unchanged (skipped) · ${fmt(j.system_listed)} system sounds listed</div>
+    ${pct!=null?`<div class="prog"><div style="width:${pct}%"></div></div>`:''}<div class="path" style="margin-top:4px">${esc(j.current)}</div></div>
+    <button class="btn" data-act="stop">Stop</button></div>`)}
+  if(SUM&&SUM.usb&&SUM.usb.length){const u=SUM.usb[0];const det=USBD&&USBD.root===u.root?USBD:null;
+    const picked=det?det.diffs.filter((d,i)=>!usbOff[i]).length:u.n;
+    out.push(`<div class="notice usb" role="status" style="flex-direction:column;align-items:stretch">
+     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffb547" stroke-width="1.8" aria-hidden="true"><path d="M9 3h6v5H9zM7 8h10v9a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z"/></svg>
+     <div class="grow"><div class="h" style="color:#ffd38a">USB ${esc(u.label)} plugged in</div><div style="color:#c8ddea;font-size:12px">${u.n} track${u.n===1?' has':'s have'} hot cue changes saved on the stick (from the CDJ) that your library doesn't have yet. Bring them in?</div></div>
+     <button class="btn" data-act="usb-review" style="border-color:#ffb547;color:#ffd38a">${usbOpen?'Hide changes':'Review changes'}</button>
+     <button class="btn go" data-act="usb-import">${usbOpen?`Import ${picked} selected`:'Import all'}</button><button class="btn" data-act="usb-skip">Not now</button></div>
+     ${usbOpen&&det?`<div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid #5a3d0c;padding-top:8px">${det.diffs.map((d,i)=>`<label class="usbrow"><input type="checkbox" data-usb="${i}" ${usbOff[i]?'':'checked'} style="accent-color:#3ee08f"><span><b>${esc(d.title)}</b> <span class="muted">· ${esc(d.artist)}</span><br><span style="color:#ffd38a;font-size:12px">${d.changes.map(esc).join(' · ')}</span></span></label>`).join('')}</div>`:''}
+    </div>`)}
+  if(SUM&&SUM.inbox_new>0&&SUM.settings.inbox_mode==='ask'&&!inboxDismissed){
+    out.push(`<div class="notice inbox" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#35dcff" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
+    <div class="grow"><div class="h" style="color:#bfefff">${SUM.inbox_new} new track${SUM.inbox_new===1?'':'s'} landed in your Inbox folder</div>
+    <div style="color:#c8ddea;font-size:12px">Analyze now (tags, length, quality) or later? They wait under Needs Analysis until you do.</div></div>
+    <button class="btn pri" data-act="inbox-now">Analyze now</button><button class="btn" data-act="inbox-later">Later</button>
+    <label class="chk" style="color:#9bbdd3;font-size:12px"><input type="checkbox" id="inboxRemember">Don't ask again</label></div>`)}
+  $('#notices').innerHTML=out.join('');$('#notices').style.display=out.length?'flex':'none';$('#notices').style.flexDirection='column';$('#notices').style.gap='8px';
+}
+
+function sidebar(){
+  const sh=S.shut;const sec=(k,label,sum,extra='')=>`<button class="sec" data-shut="${k}" aria-expanded="${!sh[k]}"><span class="ar">${sh[k]?'▸':'▾'}</span><span>${label}</span>${extra}<span class="sum">${sh[k]?esc(sum):''}</span></button>`;
+  const views=SUM.views.filter(v=>v.count>0||['all','needs','hascues'].includes(v.id));
+  let h=sec('lib','LIBRARY',(views.find(v=>v.id===S.view)||{}).name||'');
+  if(!sh.lib)h+=views.map(v=>`<button class="vi${!S.pl&&!S.browse&&S.view===v.id?' on':''}" data-view="${v.id}"><span>${esc(v.name)}</span><span class="mono">${fmt(v.count)}</span></button>`).join('');
+  const pls=SUM.playlists;const curPl=pls.find(p=>p.id===S.pl);
+  h+=sec('pl','PLAYLISTS',curPl?curPl.name:'',' <span class="badge">CDJ VIEW</span>');
+  if(!sh.pl){
+    if(!pls.length)h+=`<div class="muted" style="padding:6px">No playlists yet. Import your rekordbox XML (bottom of the page) to bring them in.</div>`;
+    else{const kids=pid=>pls.filter(p=>(p.parent_id??null)===pid);
+      const rows=[];const walk=(pid,d)=>kids(pid).forEach(p=>{
+        if(p.is_folder){const op=S.open[p.id]!==false;rows.push(`<button class="pl" data-folder="${p.id}" style="padding-left:${8+d*14}px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffb547" stroke-width="1.8" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg><span class="nm">${esc(p.name)}</span><span style="width:12px;color:#6f93ad">${op?'▾':'▸'}</span></button>`);if(op)walk(p.id,d+1)}
+        else{const c=!p.n?'#2a4a66':p.notready?'#ffb547':'#3ee08f';rows.push(`<button class="pl${S.pl===p.id?' on':''}" data-pl="${p.id}" style="padding-left:${8+d*14}px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#35dcff" stroke-width="1.8" aria-hidden="true"><path d="M4 6h12M4 12h12M4 18h8M18 15v6M15 18h6"/></svg><span class="nm">${esc(p.name)}</span><span class="mono" style="font-size:11px;color:#8db3cc">${p.n}</span><span class="dot" style="background:${c}" title="${!p.n?'Empty playlist':p.notready?p.notready+' tracks need cues':'All tracks cued'}"></span></button>`)}});
+      walk(null,0);h+=`<div class="cdj">${rows.join('')}</div><div class="muted" style="display:flex;gap:10px;padding:4px 6px 0"><span><span style="color:#3ee08f">●</span> all cued</span><span><span style="color:#ffb547">●</span> some need cues</span></div>`}}
+  const B=SUM.browse||{};const bnames={genre:'Genre',era:'Era',mood:'Mood',subgenre:'Subgenre'};
+  h+=sec('br','BROWSE',S.browse?`${bnames[S.browse.k]}: ${S.browse.v}`:'');
+  if(!sh.br){const groups=['genre','era','subgenre','mood'].filter(k=>(B[k]||[]).length);
+    h+=groups.map(k=>{const op=S.open['b_'+k]===true||(S.browse&&S.browse.k===k);const list=B[k];
+      return `<button class="vi" data-bopen="${k}" style="font-weight:600"><span>${op?'▾':'▸'} ${bnames[k]}</span><span class="mono">${list.length}</span></button>`+(op?list.map(x=>`<button class="bv${S.browse&&S.browse.k===k&&S.browse.v===x.v?' on':''}" data-bk="${k}" data-bv="${esc(x.v)}"><span>${esc(x.v)}</span><span class="mono">${fmt(x.n)}</span></button>`).join(''):'')}).join('');
+    if(!B.mood||!B.mood.length)h+=`<div class="muted" style="padding:4px 8px">Mood and Subgenre fill in as you tag tracks (Edit details).</div>`}
+  const dOff=S.drivesOff;h+=sec('drv','LOCATIONS',`${SUM.drives.filter(d=>!dOff.includes(d.drive)).length} of ${SUM.drives.length} on`);
+  if(!sh.drv){h+=SUM.drives.map(d=>`<label class="chk"><input type="checkbox" data-drive="${esc(d.drive)}" ${dOff.includes(d.drive)?'':'checked'}><span style="flex:1">${esc(d.drive)}${d.drive.length===1?':':''}</span><span class="mono" style="color:#8db3cc">${fmt(d.n)}</span></label>`).join('')||'<div class="muted" style="padding:6px">Nothing scanned yet.</div>';
+    h+=`<div style="display:flex;gap:6px;margin-top:6px"><button class="btn" style="flex:1" data-act="addroot">+ Add location</button><button class="btn" data-act="scan" ${SUM.job.running?'disabled':''}>Scan</button></div>`}
+  return `<aside class="side">${h}</aside>`;
+}
+
+function mainCol(){
+  const R=SUM.ready;const tot=Object.values(R).reduce((a,b)=>a+b,0);
+  const chips=['All','Ready','Some Cues','No Cues','Needs Analysis'].map(n=>{const c=COLORS[n]||'#35dcff',on=S.status===n;return `<button class="chip" data-status="${n}" style="${on?`border-color:${c};background:${c}22;color:${c}`:''}">${n} <span class="mono">${fmt(n==='All'?tot:R[n]||0)}</span></button>`}).join('');
+  const cols=[['title','Title'],['artist','Artist'],['bpm','BPM'],['key','Key'],['rc','rekordbox'],...(SER()?[[null,'Serato']]:[]),[null,'Status'],['genre','Genre'],['length','Length'],[null,'Type']];
+  const head=`<th class="cb"><input type="checkbox" id="selall" aria-label="Select all shown"></th>`+cols.map(([k,n])=>`<th class="c-${(k||n).toLowerCase()}" ${k?`data-sort="${k}" title="Sort by ${n}"`:''}>${n}${k&&S.sort===k?(S.desc?' ▼':' ▲'):''}</th>`).join('')+'<th aria-label="Menu"></th>';
+  const genres=(SUM.browse&&SUM.browse.genre)||[];
+  return `<main><div class="chips">${chips}
+   <select id="genreSel" aria-label="Genre filter" style="padding:5px 8px"><option value="">All genres</option>${genres.map(g=>`<option ${S.genre===g.v?'selected':''} value="${esc(g.v)}">${esc(g.v)} (${fmt(g.n)})</option>`).join('')}</select>
+   <button class="btn" style="margin-left:auto" data-act="reset">Reset</button></div>
+  <div id="bulk"></div>
+  <div class="tablewrap"><table><thead><tr>${head}</tr></thead><tbody id="tb"></tbody></table><div id="empty"></div></div>
+  <div style="display:flex;align-items:center;gap:10px"><span class="muted" id="countnote"></span><button class="btn" id="more" data-act="more" hidden>Load more</button></div></main>`;
+}
+function rowsHtml(){
+  $('#tb').innerHTML=ROWS.map(t=>{const b=bpmShow(t.bpm,t.bpm_auto),kc=keyColor(t.key);return `<tr class="r${CUR&&CUR.id===t.id?' sel':''}${t.missing?' gone':''}" data-id="${t.id}">
+  <td class="cb"><input type="checkbox" data-sel="${t.id}" ${SEL.has(t.id)?'checked':''} aria-label="Select ${esc(t.title)}"></td><td class="t" title="${esc(t.title)}">${esc(t.title)}<span class="m-artist">${esc(t.artist)}</span></td><td class="c-artist" title="${esc(t.artist)}">${esc(t.artist)}</td>
+  <td class="mono" style="${b.half?'color:#ffb547':''}" title="${b.half?`Doubled from ${t.bpm_raw} (half-time read)`:''}">${b.t}</td><td>${kc?`<span class="keychip" style="background:${kc}">${esc(t.key)}</span>`:'<span style="color:#6f93ad">—</span>'}</td>
+  <td>${pill(t.rc)}</td>${SER()?`<td>${pill(t.sc,t.sc==null)}</td>`:''}<td class="c-status" style="color:${COLORS[t.status]}">● ${t.missing?'Not linked':t.status}</td>
+  <td class="c-genre">${esc(t.genre||'—')}</td><td class="mono c-length">${len(t.duration)}</td><td class="c-type">${esc((t.ext||'').toUpperCase())}${t.dup?' <span style="color:#b46bff" title="Exact duplicate of another file">⧉</span>':''}</td><td class="menu"><button class="dots" data-menu="${t.id}" aria-label="Track menu">⋯</button></td></tr>`}).join('');
+  const sa=$('#selall');if(sa){sa.checked=ROWS.length>0&&ROWS.every(r=>SEL.has(r.id));sa.indeterminate=!sa.checked&&ROWS.some(r=>SEL.has(r.id))}
+  bulkBar();
+  $('#empty').innerHTML=ROWS.length?'':`<div style="padding:24px;text-align:center;color:#7fa6c2">${SUM.views[0].count?'No tracks match. Try Reset.':'Your library is empty. Add a location and press Scan, or import your rekordbox XML below.'}</div>`;
+  $('#countnote').textContent=`Showing ${fmt(ROWS.length)} of ${fmt(TOTAL)} tracks`;
+  $('#more').hidden=ROWS.length>=TOTAL;
+}
+
+const CUE_COLS=['#e8264c','#ff8c1a','#f5d327','#3ee08f','#35dcff','#3d7bff','#b46bff','#ff5ec4'];
+const L8='ABCDEFGH';
+const len0=s=>{s=Math.max(0,Math.round(s||0));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
+function padStyle(c){if(!c)return '';const col=c.color||CUE_COLS[c.slot];return `border-color:${col};color:${col};background:${col}22;box-shadow:0 0 10px ${col}45`}
+function detail(){
+  const t=CUR;if(!t)return `<aside class="detail"><div class="panel muted">Pick a track to see its details and cues.</div></aside>`;
+  const b=bpmShow(t.bpm,t.bpm_auto),kc=keyColor(t.musical_key);const hue=((t.catalog_title||'').length*37)%360;
+  const hot=t.hot||[];const mem=t.cues.filter(c=>c.kind==='memory');
+  const pads=L8.split('').map((l,i)=>{const c=hot.find(x=>x.slot===i);return `<button class="pad" data-pad="${i}" title="${c?`Hot cue ${l} at ${len0(c.pos_sec)}. Click to jump, Shift-click to clear.`:`Empty. Click to set hot cue ${l} at the playhead.`}" style="${padStyle(c)}">${l}</button>`}).join('');
+  let v,vc;
+  if(t.missing){v='Not linked to a file yet. Click + Add location and pick the folder this track is in, so ManaFlow can play it.';vc='#ff5470'}
+  else if(hot.length>=8){v='All 8 hot cues set';vc='#3ee08f'}
+  else if(hot.length){v=`${hot.length} of 8 hot cues set (${hot.map(c=>L8[c.slot]).join(', ')})`;vc='#ffb547'}
+  else{v='No hot cues yet. Use the pads under the waveform to set them.';vc='#ff8a3d'}
+  if(!t.bpm){v+=' No BPM yet.'}
+  const edited=hot.some(c=>c.source==='manaflow');
+  return `<aside class="detail"><div class="panel" style="display:flex;flex-direction:column;gap:10px">
+   <div style="display:flex;gap:12px"><div class="art" style="background:linear-gradient(160deg,hsl(${hue} 70% 55%),hsl(${(hue+60)%360} 60% 25%) 60%,#06101c)"><span>${esc((t.catalog_artist||'').toUpperCase())}<br>${esc((t.catalog_title||'').toUpperCase())}</span>${SUM.ffmpeg&&!t.missing?`<img data-art="${t.id}" alt="Cover art" onerror="this.remove()">`:''}</div>
+   <div class="kv"><div class="h" style="grid-column:1/-1;font-size:20px;line-height:1.1;word-break:break-word">${esc(t.catalog_title)}</div><div style="grid-column:1/-1;color:#8db3cc;margin-bottom:4px">${esc(t.catalog_artist)}</div>
+   <span>BPM</span><span class="mono">${b.t}${t.bpm_auto==1?` <span style="color:#ffb547">(read as ${t.bpm_raw})</span>`:''}${t.bpm?`<button class="bpmbtn" data-bpm="half" title="Halve the BPM">÷2</button><button class="bpmbtn" data-bpm="x2" title="Double the BPM">×2</button>`:''}</span><span>Key</span><span style="${kc?`color:${kc};font-weight:600`:'color:#6f93ad'}">${esc(t.musical_key||'—')}</span>
+   <span>Genre</span><span>${esc(t.genre||'—')}</span><span>Length</span><span class="mono">${len(t.duration)}</span><span>Format</span><span>${esc((t.ext||'').toUpperCase())}${t.bitrate?` · ${Math.round(t.bitrate/1000)} kbps`:''}${t.sample_rate?` · ${(t.sample_rate/1000).toFixed(1)} kHz`:''}</span>
+   <span>Status</span><span style="color:${COLORS[t.status]}">● ${t.status}</span></div></div></div>
+   <div class="panel" style="display:flex;flex-direction:column;gap:8px"><div class="h" style="font-size:14px">Cue Information</div>
+   <div style="display:grid;grid-template-columns:repeat(${SER()?2:1},minmax(0,1fr));gap:12px">
+    <div style="display:flex;flex-direction:column;gap:6px"><div style="color:#9bbdd3;font-size:12px">Hot Cues <span class="mono">(${hot.length}/8)</span>${edited?' <span class="muted">· edited in ManaFlow</span>':''}</div><div class="pads">${pads}</div></div>
+    ${SER()?`<div style="display:flex;flex-direction:column;gap:6px"><div style="color:#9bbdd3;font-size:12px">Serato Hot Cues <span class="mono">(not read yet)</span></div><div class="pads">${'12345678'.split('').map(l=>`<span class="pad" style="cursor:default">${l}</span>`).join('')}</div></div>`:''}</div>
+   <label class="chk" style="color:#9bbdd3;font-size:12px;padding:0"><input type="checkbox" data-act="serato" ${SER()?'checked':''}>Show Serato cues too</label>
+   ${mem.length?`<div class="muted">${mem.length} memory cue${mem.length===1?'':'s'} from rekordbox</div>`:''}
+   <div class="verdict" style="color:${vc};border:1px solid ${vc}55;background:${vc}12">${v}</div>
+   ${t.playlists.length?`<div class="muted">In playlists: ${t.playlists.map(esc).join(', ')}</div>`:''}
+   <div class="path">${esc(t.path)}</div></div></aside>`;
+}
+
+// ---------------- deck: big waveform, transport, hot cues
+let HEAD=0;
+const loaded=()=>CUR&&audio.dataset.id==String(CUR.id);
+const playing=()=>loaded()&&!audio.paused;
+const curTime=()=>loaded()?audio.currentTime:HEAD;
+const durOf=()=>(CUR&&(CUR.duration||(WAVE&&WAVE.id===CUR.id&&WAVE.duration)))||(loaded()&&isFinite(audio.duration)?audio.duration:0);
+function deckHtml(){
+  if(!CUR)return `<div class="deck panel muted">Pick a track to load it on the deck.</div>`;
+  const t=CUR,b=bpmShow(t.bpm,t.bpm_auto),kc=keyColor(t.musical_key),hue=((t.catalog_title||'').length*37)%360;
+  return `<div class="deck panel" aria-label="Deck">
+   <div class="deckTop">
+    <div class="transport">
+     <button class="tbtn" data-act="deckstop" title="Stop and go back to the start" aria-label="Stop" ${t.missing?'disabled':''}><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg></button>
+     <button class="tbtn big" id="playBtn" data-act="play" aria-label="Play" ${t.missing?'disabled':''}><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path id="playIcon" d="M7 4l13 8-13 8z"/></svg></button>
+    </div>
+    <div class="dart" style="background:linear-gradient(160deg,hsl(${hue} 70% 55%),hsl(${(hue+60)%360} 60% 25%))">${SUM.ffmpeg&&!t.missing?`<img data-art="${t.id}" alt="" onerror="this.remove()">`:''}</div>
+    <div class="dinfo"><div class="h">${esc(t.catalog_title)}</div><div style="color:#8db3cc">${esc(t.catalog_artist)}</div></div>
+    <div class="dstats mono"><span>BPM</span><span>KEY</span><span>TIME</span><span>REMAIN</span>
+     <b style="${b.half?'color:#ffb547':''}">${b.t}</b><b style="${kc?`color:${kc}`:''}">${esc(t.musical_key||'—')}</b><b id="dtime">0:00</b><b id="drem">-${len0(durOf())}</b></div>
+   </div>
+   <div class="bigwave" id="bigwave" title="Click to move the playhead"><canvas id="wc"></canvas><div class="wmsg" id="wmsg"></div></div>
+   <div class="deckPads" id="deckPads"></div>
+   <div class="muted hint">Click the waveform to move the playhead, then tap an empty pad to drop a hot cue there. Tap a lit pad to jump to it. Shift-click or right-click a pad to clear it. Keys: Space play/pause, 1–8 hot cues A–H.</div>
+  </div>`;
+}
+function padsUpdate(){
+  const box=$('#deckPads');if(box&&CUR){const hot=CUR.hot||[];
+    box.innerHTML=L8.split('').map((l,i)=>{const c=hot.find(x=>x.slot===i);return `<button class="hpad" data-pad="${i}" title="${c?`Jump to ${l}. Shift-click to clear.`:`Set ${l} at the playhead`}" style="${padStyle(c)}">${l}<small>${c?len0(c.pos_sec):esc(((MF.settings().cue_names||'').split(',')[i]||'set'))}</small></button>`}).join('')}
+}
+function renderDeck(){const d=$('#deck');if(!d)return;d.innerHTML=S.tab==='Library'?deckHtml():'';padsUpdate();drawWave();uiPlay();fillArt()}
+function uiPlay(){const b=$('#playBtn'),i=$('#playIcon');if(!b||!i)return;const p=playing();i.setAttribute('d',p?'M6 5h4v14H6zM14 5h4v14h-4z':'M7 4l13 8-13 8z');b.classList.toggle('on',p);b.setAttribute('aria-label',p?'Pause':'Play')}
+function drawWave(){
+  const cv=$('#wc');if(!cv||!CUR)return;const box=cv.parentElement,w=box.clientWidth,h=box.clientHeight,dpr=window.devicePixelRatio||1;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+'px';cv.style.height=h+'px'}
+  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  const dur=durOf(),pos=curTime(),mid=h/2,msg=$('#wmsg');
+  g.fillStyle='#0b2236';g.fillRect(0,mid,w,1);
+  if(WAVE&&WAVE.id===CUR.id){const P=WAVE.peaks,T=WAVE.tone||[],N=P.length,bw=w/N;msg.textContent='';
+    for(let i=0;i<N;i++){const amp=Math.max(1,P[i]*(mid-6)),t=T[i]||0,done=dur&&(i+.5)/N<pos/dur;
+      g.fillStyle=`hsla(${215-t*30},${90-t*40}%,${42+t*46}%,${done?0.4:1})`;g.fillRect(i*bw,mid-amp,Math.max(1,bw-.4),amp*2)}}
+  else msg.textContent=CUR.missing?'Not linked yet. Add the folder this track is in (+ Add location) to see and play it.':(SUM&&SUM.ffmpeg?'Drawing waveform…':'Waveform needs ffmpeg (see Settings). Playback and hot cues still work.');
+  if(dur)(CUR.hot||[]).forEach(c=>{const x=Math.round(w*c.pos_sec/dur),col=c.color||CUE_COLS[c.slot];
+    g.fillStyle=col;g.fillRect(x-1,0,2,h);g.fillRect(x,0,15,15);g.fillStyle='#04101c';g.font='bold 11px "IBM Plex Mono",monospace';g.fillText(L8[c.slot],x+3,12)});
+  const px=dur?w*pos/dur:0;g.fillStyle='#ffffff';g.fillRect(Math.round(px)-1,0,2,h);g.beginPath();g.moveTo(px-6,h);g.lineTo(px+6,h);g.lineTo(px,h-8);g.fill();
+  const dt=$('#dtime'),dr=$('#drem');if(dt)dt.textContent=len0(pos);if(dr)dr.textContent='-'+len0(dur-pos);
+}
+let raf=0;function loop(){drawWave();if(playing())raf=requestAnimationFrame(loop);else raf=0}
+function startLoop(){if(!raf)raf=requestAnimationFrame(loop)}
+window.addEventListener('resize',()=>drawWave());
+
+function dashboard(){
+  const T=SUM.types,tot=T.reduce((a,b)=>a+b.n,0)||1;const top=T.slice(0,3),other=T.slice(3).reduce((a,b)=>a+b.n,0);
+  const cols=['#35dcff','#b46bff','#3ee08f','#ffb547'];let acc=0;const segs=[...top,{ext:'Other',n:other}].filter(x=>x.n).map((x,i)=>{const a=acc;acc+=100*x.n/tot;return {...x,c:cols[i],a,b:acc}});
+  const R=SUM.ready,rt=Object.values(R).reduce((a,b)=>a+b,0)||1;const nPl=SUM.playlists.filter(p=>!p.is_folder).length;
+  const notin=(SUM.views.find(v=>v.id==='notinpl')||{}).count||0;const lib=SUM.views[0].count;
+  return `<div class="dash">
+  <div class="panel" style="display:flex;gap:14px;align-items:center"><div class="ring" style="background:conic-gradient(#35dcff 0 100%,#10324f 0)"><div style="width:66px;height:66px" class="h">${fmt(lib)}</div></div>
+   <div style="display:flex;flex-direction:column;gap:2px"><div class="h" style="color:#35dcff;font-size:15px">Library</div><div style="color:#9bbdd3">${fmt(lib)} tracks · ${nPl} playlists</div><div style="color:#9bbdd3">${fmt(notin)} not in any playlist</div>
+   <div class="muted">${SUM.rb_last_import?`rekordbox imported ${esc(SUM.rb_last_import.replace('T',' '))}`:'rekordbox not imported yet'}</div></div></div>
+  <div class="panel" style="display:flex;gap:14px;align-items:center"><div class="ring" role="img" aria-label="File types" style="background:conic-gradient(${segs.map(s=>`${s.c} ${s.a}% ${s.b}%`).join(',')||'#10324f 0 100%'})"><div style="width:52px;height:52px"></div></div>
+   <div class="mono" style="display:grid;grid-template-columns:auto auto;gap:2px 12px;font-size:12px">${segs.map(s=>`<span style="color:${s.c}">● ${esc(s.ext)}</span><span>${(100*s.n/tot).toFixed(1)}%</span>`).join('')}</div></div>
+  <div class="panel" style="display:flex;flex-direction:column;gap:6px"><div class="h" style="font-size:14px">Cue readiness</div>
+   ${['Ready','Some Cues','No Cues','Needs Analysis'].map(n=>`<div style="display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center"><span style="color:#9bbdd3;font-size:12px">${n}</span><span class="bar"><span style="width:${100*(R[n]||0)/rt}%;background:${COLORS[n]}"></span></span><span class="mono" style="font-size:12px;text-align:right">${fmt(R[n]||0)}</span></div>`).join('')}</div>
+  <div class="panel" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-content:start">
+   <button class="btn" data-act="scan" ${SUM.job.running?'disabled':''}>Scan locations</button><button class="btn" data-act="analyze" ${SUM.job.running?'disabled':''}>Analyze library</button>
+   <button class="btn" data-act="importxml">Import rekordbox XML</button><button class="btn" data-act="dups" ${SUM.job.running?'disabled':''}>Find duplicates</button>
+   <button class="btn" data-act="xml-all">Export to rekordbox</button><button class="btn" data-act="serato">Export to Serato</button>
+   <button class="btn" data-act="csv">Report: save this list as CSV</button><button class="btn" data-act="usbcheck" style="border-color:#ffb547;color:#ffd38a">Check a CDJ USB</button></div></div>`;
+}
+
+function settings(){
+  const st=SUM.settings;
+  return `<div class="set">
+  <div class="panel"><h3>Music folders</h3><p>ManaFlow reads only the folders you add. Tracks from your rekordbox XML link up to the files in these folders automatically.</p>
+   ${SUM.roots.map(r=>`<div class="chk"><span style="flex:1;word-break:break-all">📁 ${esc(r.path)} <span class="muted">${r.perm==='granted'?'· connected':r.perm==='prompt'?'· needs reconnect':'· pick it again'}</span></span><span class="mono" style="color:#8db3cc">${fmt(r.n)}</span><button class="btn" data-root-remove="${esc(r.id)}" aria-label="Remove">✕</button></div>`).join('')||'<p class="muted">No folders yet.</p>'}
+   <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn" data-act="addroot">+ Add location</button><button class="btn" data-act="scan" ${SUM.job.running?'disabled':''}>Rescan</button>${SUM.needsReconnect?'<button class="btn pri" data-act="reconnect">Reconnect</button>':''}</div></div>
+  <div class="panel"><h3>Cues</h3><label class="chk"><input type="checkbox" data-act="serato" ${st.show_serato==='1'?'checked':''}><span>Show Serato cues</span></label>
+   <p>rekordbox hot cues always show first. Tick this to add a Serato column and Serato pads next to them.</p></div>
+  <div class="panel"><h3>BPM half-time fix</h3><label class="chk"><input type="checkbox" data-act="bpmfix" ${st.bpm_double==='1'?'checked':''}><span>Double BPMs read at half speed</span></label>
+   <p>rekordbox often reads Drum &amp; Bass at about 87 instead of 174. With this on, any BPM from <input type="text" id="bpmLo" value="${esc(st.bpm_lo)}" style="width:60px"> up to <input type="text" id="bpmHi" value="${esc(st.bpm_hi)}" style="width:60px"> is stored doubled. <button class="btn" data-act="bpmrange">Save range</button></p>
+   <p class="muted">Doubled BPMs show in amber. Use ÷2 or ×2 next to the BPM in the track panel for a single track.</p></div>
+  <div class="panel"><h3>Exports</h3><p><b>Export to rekordbox</b> saves ManaFlow-rekordbox.xml to your Downloads, with tracks, hot cues and playlists. In rekordbox: Preferences → Advanced → Database → "rekordbox xml", pick that file, then import from "rekordbox xml" in the tree.</p>
+   <p><b>Export to Serato</b> asks you to pick your Serato folder (Music\\_Serato_ for music on C:, or X:\\_Serato_ for another drive) and writes one crate per playlist, grouped under a "ManaFlow" crate.</p></div>
+  <div class="panel"><h3>CDJ USB</h3><p>After playing out, plug in your USB, click <b>Check a CDJ USB</b> and pick the top of the stick. ManaFlow shows the hot cues that changed so you can bring them in.</p><button class="btn" data-act="usbcheck" style="border-color:#ffb547;color:#ffd38a">Check a CDJ USB</button></div>
+  <div class="panel"><h3>About</h3><p>${esc(SUM.app)} ${esc(SUM.version)}. Your library is saved in this browser on this computer. Nothing is uploaded.</p>
+   <p class="muted">Clearing your browser's site data for this page erases the library (not your music). Keep your rekordbox XML handy.</p><button class="btn" data-act="wipe" style="border-color:#ff5470;color:#ff8a9e">Clear library in this browser</button></div></div>`;
+}
+function soon(name){const what={Analyze:'BPM and key detection for files rekordbox has not analyzed.',Cues:'Serato cue reader, your 8-cue layout check, and USB cue sync from the CDJ.',Convert:'Format conversion (WAV/AIFF/FLAC to MP3 and back).',Export:'Export playlists and cues to rekordbox and Serato.',Tools:'Duplicate finder and file cleanup.'}[name];
+  return `<div class="panel" style="max-width:640px"><div class="h" style="font-size:16px;color:#35dcff">${name}</div><p style="color:#9bbdd3">Coming in a later update: ${what}</p></div>`}
+
+function render(){
+  renderTabs();notices();if(!SUM)return;renderDeck();
+  const v=$('#view');
+  const mp=S.mpane||'tracks';document.body.classList.remove('m-tracks','m-side','m-detail');if(S.tab==='Library')document.body.classList.add('m-'+mp);
+  const pb=`<div class="mpanes" role="tablist">${[['side','Playlists'],['tracks','Tracks'],['detail','Track']].map(([k,n])=>`<button class="${mp===k?'on':''}" data-mpane="${k}">${n}</button>`).join('')}</div>`;
+  if(S.tab==='Library'){v.innerHTML=pb+`<div class="row">${sidebar()}${mainCol()}<div id="det" style="display:contents">${detail()}</div></div><div style="margin-top:12px">${dashboard()}</div>`;rowsHtml()}
+  else if(S.tab==='Settings')v.innerHTML=settings();
+  else v.innerHTML=({Analyze:analyzeTab,Cues:cuesTab,Convert:convertTab,Export:exportTab,Tools:toolsTab}[S.tab]||(()=>soon(S.tab)))();
+}
+const renderDetail=()=>{const d=$('#det');if(d)d.innerHTML=detail();fillArt()};
+function fillArt(){document.querySelectorAll('img[data-art]:not([data-busy])').forEach(im=>{im.dataset.busy='1';MF.artURL(+im.dataset.art).then(u=>{if(u)im.src=u;else im.remove()})})}
+
+async function loadSummary(){SUM=await api('/api/summary');}
+function trackQS(off){const p=new URLSearchParams({offset:off||0,limit:200});if(S.pl)p.set('pl',S.pl);else p.set('view',S.view);
+  if(S.status!=='All')p.set('status',S.status);if(S.q)p.set('q',S.q);if(S.sort){p.set('sort',S.sort);if(S.desc)p.set('desc','1')}
+  if(S.drivesOff.length)p.set('drives_off',S.drivesOff.join(','));if(S.browse)p.set(S.browse.k,S.browse.v);if(S.genre)p.set('genre',S.genre);return p.toString()}
+async function loadTracks(more){const j=await api('/api/tracks?'+trackQS(more?ROWS.length:0));ROWS=more?ROWS.concat(j.rows):j.rows;TOTAL=j.total;const cl=$('#csvLink');if(cl)cl.href='/api/export/csv?'+trackQS(0);
+  if(S.tab==='Library'&&$('#tb'))rowsHtml();if(!more&&ROWS.length&&(!CUR||!ROWS.some(r=>r.id===CUR.id)))selectTrack(ROWS[0].id)}
+async function selectTrack(id){CUR=await api('/api/track/'+id);WAVE=null;HEAD=0;
+  if(audio.dataset.id&&audio.dataset.id!=String(id)){audio.pause();audio.removeAttribute('src');audio.dataset.id='';audio.load()}
+  renderDetail();renderDeck();document.querySelectorAll('tr.sel').forEach(r=>r.classList.remove('sel'));const tr=document.querySelector(`tr[data-id="${id}"]`);if(tr)tr.classList.add('sel');
+  if(SUM.ffmpeg&&!CUR.missing){const bars=Math.min(1600,Math.max(400,Math.round(($('#bigwave')||{clientWidth:900}).clientWidth/2)));
+    api(`/api/waveform/${id}?bars=${bars}`).then(w=>{if(CUR&&CUR.id===id){WAVE={id,...w};drawWave()}}).catch(()=>{const m=$('#wmsg');if(m&&CUR&&CUR.id===id)m.textContent='Could not draw this waveform.'})}}
+async function refresh(){await loadSummary();render();await loadTracks()}
+
+document.addEventListener('click',async e=>{
+  if(!e.target.closest('.rmenu'))closeMenu();
+  if(e.target.closest('input[type=checkbox]'))return;
+  const el=e.target.closest('[data-view],[data-pl],[data-folder],[data-shut],[data-status],[data-sort],[data-act],[data-id],[data-pad],[data-root-remove],[data-menu],[data-goto],[data-mpane],[data-bk],[data-bopen],[data-bpm],[data-mi],#bigwave');if(!el)return;
+  const d=el.dataset;
+  try{
+  if(d.mpane){S.mpane=d.mpane;render();window.scrollTo(0,0);return}
+  if(d.goto){S.tab='Library';persist();render();await loadTracks();selectTrack(+d.goto);return}
+  if(d.menu){openMenu(+d.menu,el);return}
+  if(d.mi){menuAction(d.mi,+el.dataset.tid);return}
+  if(d.view){S.view=d.view;S.pl=null;S.browse=null;S.mpane='tracks';persist();render();loadTracks()}
+  else if(d.pl){S.pl=+d.pl;S.browse=null;S.mpane='tracks';persist();render();loadTracks()}
+  else if(d.bopen){S.open['b_'+d.bopen]=!(S.open['b_'+d.bopen]===true||(S.browse&&S.browse.k===d.bopen));if(S.browse&&S.browse.k===d.bopen&&!S.open['b_'+d.bopen])S.browse=null;persist();render();loadTracks()}
+  else if(d.bk){S.mpane='tracks';S.browse=S.browse&&S.browse.k===d.bk&&S.browse.v===d.bv?null:{k:d.bk,v:d.bv};S.pl=null;persist();render();loadTracks()}
+  else if(d.bpm){CUR=await post('/api/bpm',{id:CUR.id,op:d.bpm});renderDetail();renderDeck();const r=ROWS.find(x=>x.id===CUR.id);if(r){r.bpm=CUR.bpm;r.bpm_auto=CUR.bpm_auto;rowsHtml()}}
+  else if(d.folder){S.open[d.folder]=S.open[d.folder]===false;persist();render()}
+  else if(d.shut){S.shut[d.shut]=!S.shut[d.shut];persist();render()}
+  else if(d.status){S.status=d.status;persist();render();loadTracks()}
+  else if(d.sort){S.desc=S.sort===d.sort?!S.desc:false;S.sort=d.sort;persist();render();loadTracks()}
+  else if(d.id&&el.tagName==='TR')selectTrack(+d.id);
+  else if(d.pad!=null){padHit(+d.pad,e.shiftKey)}
+  else if(el.id==='bigwave'&&CUR&&durOf()){const r=el.getBoundingClientRect();seekTo(durOf()*(e.clientX-r.left)/r.width)}
+  else if(d.rootRemove){await post('/api/roots',{remove:d.rootRemove});refresh()}
+  else if(d.act){const a=d.act;
+    if(a==='dups'){await post('/api/dups');toast('Finding duplicates. This reads every file that has a same-size twin.');poll()}
+    else if(a==='serato'){serato()}
+    else if(a==='detect-missing'){await post('/api/detect',{overwrite:$('#detOver')&&$('#detOver').checked});toast('Detecting BPM and key…');poll()}
+    else if(a==='detect-sel'){await post('/api/detect',{ids:[...SEL],overwrite:true});toast(`Detecting ${SEL.size} tracks…`);poll()}
+    else if(a==='cue-save'){await post('/api/settings',{cue_need:$('#cueNeed').value,cue_names:[...Array(8)].map((_,i)=>$('#cn'+i).value.replace(/,/g,' ')).join(',')});toast('Cue layout saved');await loadSummary();render()}
+    else if(a==='cue-check'){cueCheck()}
+    else if(a==='convert'){const v=$('#cvFmt').value;const fmt_=v.startsWith('mp3')?'mp3':'wav',kb=v==='mp3-192'?192:320;let dir=null;
+      if($('#cvDest').value==='pick'){dir=await showDirectoryPicker({id:'convert-out',mode:'readwrite'})}
+      MF.convert([...SEL],fmt_,kb,dir);toast('Converting…');poll()}
+    else if(a==='xml-scope'){const v=$('#xmlScope').value;MF.exportRekordbox(v?{pl:v}:{});toast('Saved ManaFlow-rekordbox.xml')}
+    else if(a==='csv-scope'){const v=$('#csvScope').value;MF.exportCSV(v?{pl:v}:{view:'all'})}
+    else if(a==='backup'){MF.backup()}
+    else if(a==='restore'){$('#restorefile').click()}
+    else if(a==='show-dups'){S.tab='Library';S.view='dups';S.pl=null;S.browse=null;persist();render();loadTracks()}
+    else if(a==='xml-all'){MF.exportRekordbox({});toast('Saved ManaFlow-rekordbox.xml to your Downloads')}
+    else if(a==='xml-sel'){MF.exportRekordbox({ids:[...SEL].join(',')});toast('Saved ManaFlow-rekordbox.xml to your Downloads')}
+    else if(a==='csv'){MF.exportCSV(Object.fromEntries(new URLSearchParams(trackQS(0))))}
+    else if(a==='csv-sel'){MF.exportCSV({ids:[...SEL].join(',')})}
+    else if(a==='reconnect'){const n=await MF.reconnect();toast(n?'Music folders reconnected':'Folders not reconnected');refresh()}
+    else if(a==='usbcheck'){if(!MF.canPick){toast('Use Chrome or Edge on your PC for this');return}const h=await showDirectoryPicker({id:'cdj-usb'});const n=await MF.usbScan(h);if(!n)toast('No hot cue changes found on that USB');await loadSummary();notices()}
+    else if(a==='wipe'){confirmBox('Clear the ManaFlow library in this browser?','Your music files are not touched. You can import your rekordbox XML again any time.',()=>MF.wipe())}
+    else if(a==='bpmrange'){await post('/api/settings',{bpm_lo:$('#bpmLo').value,bpm_hi:$('#bpmHi').value});toast('BPM range saved');refresh()}
+    else if(a==='bulk-clear'){SEL.clear();rowsHtml()}
+    else if(a==='bulk-edit'){editModal([...SEL])}
+    else if(a==='usb-review'){usbOpen=!usbOpen;if(usbOpen&&SUM.usb.length){const all=await api('/api/usb');USBD=all.find(x=>x.root===SUM.usb[0].root)||null;usbOff={}}notices()}
+    else if(a==='usb-import'){const u=SUM.usb[0];let ids=[];if(usbOpen&&USBD)ids=USBD.diffs.filter((x,i)=>!usbOff[i]).map(x=>x.id);
+      if(usbOpen&&USBD&&!ids.length){toast('Nothing selected');return}
+      const r=await post('/api/usb',{action:'import',root:u.root,ids});toast(`Imported cue changes for ${r.n} track${r.n===1?'':'s'}`);usbOpen=false;USBD=null;await refresh();if(CUR)selectTrack(CUR.id)}
+    else if(a==='usb-skip'){await post('/api/usb',{action:'skip',root:SUM.usb[0].root});usbOpen=false;USBD=null;await loadSummary();notices();toast('Skipped. The changes stay on the USB.')}
+    else if(a==='reset'){Object.assign(S,{view:'all',pl:null,status:'All',sort:'',desc:false,drivesOff:[],browse:null,genre:''});S.q='';$('#q').value='';persist();render();loadTracks()}
+    else if(a==='more')loadTracks(true);
+    else if(a==='scan'){const r=await post('/api/scan');if(!r.started)toast('A scan is already running');poll()}
+    else if(a==='analyze'){await post('/api/analyze');poll()}
+    else if(a==='stop'){await post('/api/stop')}
+    else if(a==='importxml')$('#xmlfile').click();
+    else if(a==='addroot'){if(MF.canPick){await MF.addFolder();toast('Reading your folder…');poll()}else if(IS_TOUCH)$('#filepick').click();else $('#dirpick').click()}
+    else if(a==='play')togglePlay();
+    else if(a==="deckstop")stopPlay();
+    else if(a==='saveinbox'){await post('/api/settings',{inbox_path:$('#inboxPath').value});toast('Inbox folder saved');refresh()}
+    else if(a==='inbox-now'||a==='inbox-later'){const r=await post('/api/inbox',{action:a.slice(6),remember:$('#inboxRemember')&&$('#inboxRemember').checked});inboxDismissed=false;
+      toast(a==='inbox-now'?`Analyzing ${r.n} new tracks`:`${r.n} tracks waiting under Needs Analysis`);poll()}
+  }}catch(err){toast(err.message)}
+});
+document.addEventListener('change',async e=>{const el=e.target,d=el.dataset;try{
+  if(d.sel){const id=+d.sel;el.checked?SEL.add(id):SEL.delete(id);rowsHtml();return}
+  if(el.id==='selall'){ROWS.forEach(r=>el.checked?SEL.add(r.id):SEL.delete(r.id));rowsHtml();return}
+  if(d.usb!=null){usbOff[d.usb]=!el.checked;notices();return}
+  if(el.id==='genreSel'){S.genre=el.value;persist();loadTracks();return}
+  if(d.act==='bpmfix'){await post('/api/settings',{bpm_double:el.checked?'1':'0'});toast(el.checked?'Half-time BPMs doubled':'Half-time BPMs put back');refresh();return}
+  if(d.drive!=null){S.drivesOff=el.checked?S.drivesOff.filter(x=>x!==d.drive):S.drivesOff.concat(d.drive);persist();render();loadTracks()}
+  else if(d.act==='sys'){await post('/api/settings',{analyze_sys:el.checked?'1':'0'});await loadSummary();render();if(el.checked)toast('System sounds will be analyzed on the next Analyze')}
+  else if(d.act==='serato'){await post('/api/settings',{show_serato:el.checked?'1':'0'});await loadSummary();render()}
+  else if(d.act==='lan'){await post('/api/settings',{allow_lan:el.checked?'1':'0'});await loadSummary();render()}
+  else if(d.rootToggle){await post('/api/roots',{toggle:d.rootToggle});refresh()}
+  else if(el.id==='inboxMode'){await post('/api/settings',{inbox_mode:el.value});await loadSummary();render()}
+}catch(err){toast(err.message)}});
+$('#restorefile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const n=await MF.restore(f);toast(`Restored ${fmt(n)} tracks`);refresh()}catch(err){toast(err.message)}e.target.value=''};
+$('#filepick').onchange=e=>{if(e.target.files.length){MF.addFiles(e.target.files);toast(`Adding ${e.target.files.length} files…`);poll()}e.target.value=''};
+$('#dirpick').onchange=e=>{if(e.target.files.length){MF.addFolderFiles(e.target.files);poll()}e.target.value=''};
+$('#xmlfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;toast('Importing rekordbox collection…');
+  try{const r=await api('/api/import/rekordbox',{method:'POST',body:f});toast(`Imported ${fmt(r.tracks)} tracks, ${r.playlists} playlists, ${fmt(r.hot_cues)} hot cues`);refresh()}catch(err){toast(err.message)}e.target.value=''};
+
+function ensureLoaded(then){if(!CUR||CUR.missing)return;
+  if(loaded()){then();return}
+  const id=CUR.id;MF.audioURL(id).then(u=>{if(!u){toast('Reconnect or add the music folder to play this track');return}
+    if(audio.src&&audio.src.startsWith('blob:'))URL.revokeObjectURL(audio.src);audio.src=u;audio.dataset.id=String(id);
+    audio.addEventListener('loadedmetadata',()=>{audio.currentTime=HEAD;then()},{once:true});audio.load()})}
+function playAt(sec){HEAD=Math.max(0,sec);ensureLoaded(()=>{audio.currentTime=HEAD;audio.play().catch(()=>toast('Could not start playback'))})}
+function togglePlay(){if(!CUR)return;if(playing()){audio.pause();return}ensureLoaded(()=>audio.play().catch(()=>toast('Could not start playback')))}
+function stopPlay(){HEAD=0;if(loaded()){audio.pause();audio.currentTime=0}drawWave();uiPlay()}
+function seekTo(sec){HEAD=Math.max(0,Math.min(sec,durOf()||sec));if(loaded())audio.currentTime=HEAD;drawWave()}
+async function padHit(slot,clear){if(!CUR||CUR.missing)return;const c=(CUR.hot||[]).find(x=>x.slot===slot);
+  try{
+    if(clear){if(!c)return;CUR=await post('/api/cue/'+CUR.id,{slot,pos:null});toast(`Hot cue ${L8[slot]} cleared`)}
+    else if(c){playAt(c.pos_sec);return}
+    else{const at=curTime();CUR=await post('/api/cue/'+CUR.id,{slot,pos:at});toast(`Hot cue ${L8[slot]} set at ${len0(at)}`)}
+    padsUpdate();renderDetail();drawWave();
+    const r=ROWS.find(x=>x.id===CUR.id);if(r){r.rc=(CUR.hot||[]).length;r.status=CUR.status;rowsHtml()}
+  }catch(err){toast(err.message)}}
+audio.onplay=()=>{uiPlay();startLoop()};audio.onpause=audio.onended=()=>{if(loaded())HEAD=audio.currentTime;uiPlay();drawWave()};
+audio.onseeked=()=>drawWave();
+audio.onerror=()=>{if(audio.getAttribute('src'))toast('Could not play this file in the browser')};
+document.addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea')||S.tab!=='Library'||!CUR)return;
+  if(e.code==='Space'){e.preventDefault();togglePlay()}
+  const m=e.code.match(/^Digit([1-8])$/);if(m){e.preventDefault();padHit(+m[1]-1,e.shiftKey)}});
+let lpT=null,lpDone=false;
+document.addEventListener('touchstart',e=>{const p=e.target.closest('[data-pad]');if(!p)return;lpDone=false;lpT=setTimeout(()=>{lpDone=true;padHit(+p.dataset.pad,true);if(navigator.vibrate)navigator.vibrate(30)},650)},{passive:true});
+document.addEventListener('touchend',e=>{clearTimeout(lpT);if(lpDone&&e.target.closest('[data-pad]')){e.preventDefault();lpDone=false}});
+document.addEventListener('touchmove',()=>clearTimeout(lpT),{passive:true});
+document.addEventListener('contextmenu',e=>{const p=e.target.closest('[data-pad]');if(p){e.preventDefault();padHit(+p.dataset.pad,true)}});
+
+let polling=false;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function poll(){if(polling)return;polling=true;
+  try{while(true){const j=await api('/api/job');SUM.job=j;notices();if(!j.running)break;await sleep(1000)}}catch(e){}
+  polling=false;await refresh()}
+setInterval(async()=>{if(polling)return;try{const s=await api('/api/summary');const changed=!SUM||s.inbox_new!==SUM.inbox_new||JSON.stringify(s.usb)!==JSON.stringify(SUM.usb);SUM=s;
+  if(s.job.running)poll();else if(changed){render();loadTracks()}}catch(e){}},6000);
+
+function bulkBar(){const b=$('#bulk');if(!b)return;const n=SEL.size;
+  b.innerHTML=n?`<div class="bulk"><b>${n} selected</b><button class="btn" data-act="bulk-edit">Edit details…</button>
+   <button class="btn" data-act="xml-sel">Export to rekordbox</button><button class="btn" data-act="csv-sel">Save as CSV</button>
+   <button class="btn" data-act="bulk-clear" style="margin-left:auto">Clear selection</button></div>`:''}
+let MENU=null;function closeMenu(){if(MENU){MENU.remove();MENU=null}}
+function openMenu(id,btn){closeMenu();const t=ROWS.find(r=>r.id===id);if(!t)return;const r=btn.getBoundingClientRect();
+  const m=document.createElement('div');m.className='rmenu';m.setAttribute('role','menu');
+  m.innerHTML=`<button data-mi="load" data-tid="${id}">Load on deck</button><button data-mi="play" data-tid="${id}" ${t.missing?'disabled':''}>Load and play</button><hr>
+   <button data-mi="edit" data-tid="${id}">Edit details…</button><button data-mi="copy" data-tid="${id}">Copy file path</button>
+   <button data-mi="xml" data-tid="${id}">Export this track to rekordbox</button>`;
+  document.body.appendChild(m);const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(8,Math.min(r.right-w,innerWidth-w-8))+'px';m.style.top=(r.bottom+h+8>innerHeight?r.top-h-4:r.bottom+4)+'px';MENU=m;m.querySelector('button').focus()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+async function menuAction(a,id){closeMenu();try{
+  if(a==='load')await selectTrack(id);
+  else if(a==='play'){await selectTrack(id);playAt(0)}
+  else if(a==='edit')editModal([id]);
+  else if(a==='reveal')await post('/api/reveal',{id});
+  else if(a==='copy'){const d=await api('/api/track/'+id);try{await navigator.clipboard.writeText(d.path);toast('File path copied')}catch(e){toast(d.path)}}
+  else if(a==='xml')MF.exportRekordbox({ids:String(id)});
+  else if(a==='recycle'){confirmBox('Move this copy to the Recycle Bin?','ManaFlow checks again that another copy matches byte for byte before moving anything. You can restore it from the Recycle Bin.',async()=>{const r=await post('/api/recycle',{id});toast('Moved. Kept: '+r.kept);refresh()})}
+}catch(err){toast(err.message)}}
+function confirmBox(title,body,ok){const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="panel"><div class="h" style="font-size:16px;color:#35dcff">${esc(title)}</div><p style="color:#9bbdd3;margin:0">${esc(body)}</p><div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn" data-x="no">Cancel</button><button class="btn go" data-x="yes">Yes, do it</button></div></div>`;
+  document.body.appendChild(m);m.onclick=async e=>{const b=e.target.closest('[data-x]');if(e.target===m||(b&&b.dataset.x==='no'))m.remove();else if(b){m.remove();try{await ok()}catch(err){toast(err.message)}}}}
+async function editModal(ids){if(!ids.length)return;const one=ids.length===1?await api('/api/track/'+ids[0]):null;
+  const F=[['title','Title'],['artist','Artist'],['genre','Genre'],['subgenre','Subgenre'],['mood','Mood'],['musical_key','Key'],['bpm','BPM'],['release_year','Year'],['comments','Comments']];
+  const val=k=>one?(k==='title'?one.catalog_title:k==='artist'?one.catalog_artist:one[k])??'':'';
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="panel"><div class="h" style="font-size:16px;color:#35dcff">${one?'Edit details':`Edit ${ids.length} tracks`}</div>
+   ${one?'':'<p class="muted" style="margin:0">Only the boxes you fill in are changed. Leave a box empty to keep each track as it is.</p>'}
+   <form class="form" id="ef">${F.map(([k,l])=>`<label for="ef_${k}">${l}</label><input type="text" id="ef_${k}" name="${k}" value="${esc(val(k))}" ${(!one&&(k==='title'))?'placeholder="(keep each title)"':''}>`).join('')}</form>
+   <p class="muted" style="margin:0">Saved in ManaFlow only. Your music files are never rewritten.</p>
+   <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn" data-x="no">Cancel</button><button class="btn go" data-x="save">Save</button></div></div>`;
+  document.body.appendChild(m);m.querySelector('input').focus();
+  m.onclick=async e=>{const b=e.target.closest('[data-x]');if(e.target===m||(b&&b.dataset.x==='no')){m.remove();return}
+    if(b&&b.dataset.x==='save'){const fd=Object.fromEntries(new FormData(m.querySelector('#ef')).entries());
+      try{if(one)await post('/api/track/'+ids[0],fd);else await post('/api/bulk',{ids,fields:fd});m.remove();toast('Saved');await refresh();if(CUR&&ids.includes(CUR.id))selectTrack(CUR.id)}catch(err){toast(err.message)}}}}
+
+async function serato(){const byDrive=await MF.exportSerato();const drives=[...byDrive.keys()];
+  if(!drives.length){toast('No playlist tracks with a known drive to export');return}
+  if(!MF.canPick){drives.forEach(d=>MF.downloadCrates(byDrive.get(d)));toast('Crates saved to Downloads. Copy them into your _Serato_\\Subcrates folder.');return}
+  const next=i=>{if(i>=drives.length)return;const d=drives[i];
+    confirmBox(`Pick the Serato folder for drive ${d}:`,`For music on ${d}: pick ${d==='C'?'the _Serato_ folder inside your Music folder':d+':\\_Serato_'}. ManaFlow writes ${byDrive.get(d).size} crate(s) into its Subcrates folder, named ManaFlow%%….`,
+      async()=>{const h=await showDirectoryPicker({id:'serato-'+d,mode:'readwrite'});const n=await MF.writeCrates(h,byDrive.get(d));toast(`Wrote ${n} crates for ${d}:`);next(i+1)})};
+  next(0)}
+
+// ---------------- tab screens
+const T_=()=>MF.tracks();
+function statTiles(items){return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${items.map(([n,l,c])=>`<div class="panel"><div class="muted">${l}</div><div class="h" style="font-size:28px;color:${c||'#35dcff'}">${fmt(n)}</div></div>`).join('')}</div>`}
+function selNote(){return SEL.size?`<b>${SEL.size}</b> ticked track${SEL.size===1?'':'s'}`:'no tracks ticked yet (tick them in the Library list)'}
+function plSelect(id){return `<select id="${id}"><option value="">Whole library</option>${SUM.playlists.filter(p=>!p.is_folder).map(p=>`<option value="${p.id}">${esc(p.name)} (${p.n})</option>`).join('')}</select>`}
+function analyzeTab(){const ts=T_();const lk=ts.filter(t=>MF.linkedId(t.id));
+  return `<div class="set">${statTiles([[ts.length,'Tracks'],[lk.length,'Linked to files','#3ee08f'],[ts.filter(t=>!t.bpm).length,'Missing BPM','#ff5470'],[ts.filter(t=>!t.key).length,'Missing key','#ffb547'],[ts.filter(t=>t.bpm_src==='ManaFlow'||t.key_src==='ManaFlow').length,'Detected by ManaFlow','#b46bff']])}
+  <div class="panel"><h3>Detect BPM and key</h3><p>ManaFlow listens to the middle two minutes of each track and estimates its BPM and key (shown in Camelot, like 8A). It only works on tracks linked to a file. Half-time BPMs get the 87 → 174 fix automatically.</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn go" data-act="detect-missing" ${SUM.job.running?'disabled':''}>Detect for tracks missing BPM or key</button>
+   <button class="btn" data-act="detect-sel" ${SUM.job.running||!SEL.size?'disabled':''}>Re-detect ticked tracks</button>
+   <label class="chk"><input type="checkbox" id="detOver">Replace rekordbox values too</label></div>
+   <p class="muted">Currently: ${selNote()}. Estimates can be off on tracks with long intros or odd time; ÷2 / ×2 in the track panel fixes a BPM fast.</p></div>
+  <div class="panel"><h3>Read tags and length</h3><p>Reads title, artist, genre, BPM and key tags already inside your MP3s, plus each file's length. Quick, and it never changes your files.</p><button class="btn" data-act="analyze" ${SUM.job.running?'disabled':''}>Read tags now</button></div></div>`}
+function cuesTab(){const st=MF.settings();const need=parseInt(st.cue_need)||8;const names=(st.cue_names||'').split(',');
+  const scope=S.cueScope||'';const pl=SUM.playlists.find(p=>p.id==scope);
+
+  return `<div class="set"><div class="panel"><h3>My cue layout</h3><p>Tell ManaFlow how you set up a track. A track counts as <b>Ready</b> when it has at least this many hot cues.</p>
+   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label>Hot cues needed <select id="cueNeed">${[1,2,3,4,5,6,7,8].map(n=>`<option ${n===need?'selected':''}>${n}</option>`).join('')}</select></label></div>
+   <div class="form" style="margin-top:10px">${'ABCDEFGH'.split('').map((l,i)=>`<label for="cn${i}" style="color:${CUE_COLS[i]};font-weight:600">${l}</label><input type="text" id="cn${i}" value="${esc(names[i]||'')}" placeholder="What ${l} is for">`).join('')}</div>
+   <div style="margin-top:8px"><button class="btn go" data-act="cue-save">Save layout</button></div></div>
+  <div class="panel"><h3>Check tracks against your layout</h3><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${plSelect('cueScope')}<button class="btn" data-act="cue-check">Check</button></div><div id="cueOut" style="margin-top:10px"></div></div>
+  <div class="panel"><h3>After a gig</h3><p>Plug in your CDJ USB and bring in the hot cues you set or moved while playing.</p><button class="btn" data-act="usbcheck" style="border-color:#ffb547;color:#ffd38a">Check a CDJ USB</button></div></div>`}
+let ROWSCUE={};
+async function cueCheck(){const sc=$('#cueScope').value;const q=new URLSearchParams({limit:50000});if(sc)q.set('pl',sc);else q.set('view','all');
+  const j=await api('/api/tracks?'+q);const st=MF.settings();const need=parseInt(st.cue_need)||8;
+  const bad=j.rows.filter(r=>r.rc<need);const good=j.rows.length-bad.length;
+  $('#cueOut').innerHTML=`<p><b style="color:#3ee08f">${fmt(good)}</b> ready · <b style="color:#ffb547">${fmt(bad.length)}</b> need cues (out of ${fmt(j.rows.length)}${j.total>j.rows.length?`, first ${j.rows.length} checked`:''})</p>
+   <div class="cdj" style="max-height:360px">${bad.slice(0,300).map(r=>`<button class="pl" data-goto="${r.id}"><span class="nm">${esc(r.title)} <span class="muted">· ${esc(r.artist)}</span></span><span class="mono" style="color:${r.rc?'#ffb547':'#ff8a3d'}">${r.rc}/${need}</span><span class="muted">${r.missing?'not linked':''}</span></button>`).join('')||'<p class="muted" style="padding:8px">Every track here matches your layout.</p>'}</div>`}
+function convertTab(){return `<div class="set"><div class="panel"><h3>Convert</h3><p>Makes a new copy of each ticked track in another format. Your original files are never changed.</p>
+   <p>Converting: ${selNote()}</p>
+   <div class="form"><label>Format</label><select id="cvFmt"><option value="wav">WAV (16-bit, lossless)</option><option value="mp3-320" selected>MP3 320 kbps</option><option value="mp3-192">MP3 192 kbps</option></select>
+   <label>Save to</label><select id="cvDest"><option value="dl">My Downloads folder</option>${MF.canPick?'<option value="pick">A folder I pick…</option>':''}</select></div>
+   <div style="margin-top:10px"><button class="btn go" data-act="convert" ${SUM.job.running||!SEL.size?'disabled':''}>Convert ${SEL.size||''} track${SEL.size===1?'':'s'}</button></div>
+   <p class="muted">MP3 encoding loads a small encoder from the internet the first time. Converting MP3 to WAV makes bigger files but doesn't bring back lost quality.</p></div></div>`}
+function exportTab(){return `<div class="set">
+  <div class="panel"><h3>rekordbox</h3><p>Saves ManaFlow-rekordbox.xml with tracks, BPM, key, hot cues (including ones set in ManaFlow) and playlists. In rekordbox: Preferences → Advanced → Database → "rekordbox xml", pick the file, then import from "rekordbox xml" in the tree.</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">${plSelect('xmlScope')}<button class="btn go" data-act="xml-scope">Export to rekordbox</button>${SEL.size?`<button class="btn" data-act="xml-sel">Export ${SEL.size} ticked</button>`:''}</div></div>
+  <div class="panel"><h3>Serato</h3><p>Writes one crate per playlist, grouped under a "ManaFlow" crate. You'll be asked to pick your _Serato_ folder.</p><button class="btn go" data-act="serato">Export to Serato</button></div>
+  <div class="panel"><h3>Spreadsheet</h3><p>A CSV file Excel opens, with title, artist, BPM, key, cues and status.</p><div style="display:flex;gap:8px;flex-wrap:wrap">${plSelect('csvScope')}<button class="btn go" data-act="csv-scope">Save CSV</button></div></div>
+  <div class="panel"><h3>Back up ManaFlow</h3><p>Saves your whole ManaFlow library (tracks, playlists, cues you set, tags and settings) to one file, so you can move it to another computer or keep it safe.</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="backup">Save backup</button><button class="btn" data-act="restore">Restore a backup…</button></div></div></div>`}
+function toolsTab(){const d=(SUM.views.find(v=>v.id==='dups')||{}).count||0;
+  return `<div class="set">
+  <div class="panel"><h3>Find duplicates</h3><p>Finds files that are exactly the same, byte for byte, even with different names. ${SUM.dups_checked?`Last checked ${esc(SUM.dups_checked.replace('T',' '))}: <b>${d}</b> duplicate files.`:''}</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="dups" ${SUM.job.running?'disabled':''}>Find duplicates</button>${d?'<button class="btn" data-act="show-dups">Show them</button>':''}</div></div>
+  <div class="panel"><h3>Music folders</h3><p>${SUM.roots.length} folder${SUM.roots.length===1?'':'s'} added.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="addroot">+ Add location</button><button class="btn" data-act="scan" ${SUM.job.running?'disabled':''}>Rescan folders</button><button class="btn" data-act="reconnect">Reconnect folders</button></div></div>
+  <div class="panel"><h3>rekordbox</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="importxml">Import rekordbox XML again</button><button class="btn" data-act="usbcheck" style="border-color:#ffb547;color:#ffd38a">Check a CDJ USB</button></div></div>
+  <div class="panel"><h3>Start over</h3><p>Clears the ManaFlow library in this browser. Your music files aren't touched.</p><button class="btn" data-act="wipe" style="border-color:#ff5470;color:#ff8a9e">Clear library</button></div></div>`}
+
+// folder picker
+async function openBrowser(start){
+  const m=document.createElement('div');m.className='modal';document.body.appendChild(m);
+  const show=async p=>{const j=await api('/api/browse?path='+encodeURIComponent(p||''));
+    m.innerHTML=`<div class="panel"><div class="h" style="font-size:15px;color:#35dcff">Add a scan location</div><div class="path">${esc(j.path||'This PC')}</div>
+    <div class="dirs">${j.parent!==undefined&&j.path?`<button data-p="${esc(j.parent)}">⬑ Up</button>`:''}${j.dirs.map(x=>`<button data-p="${esc(x)}">📁 ${esc(x.split(/[\\/]/).filter(Boolean).pop()||x)}</button>`).join('')||'<div class="muted" style="padding:10px">No folders here.</div>'}</div>
+    <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn" data-x="cancel">Cancel</button><button class="btn go" data-x="pick" ${j.path?'':'disabled'}>Use this folder</button></div></div>`;
+    m.onclick=async e=>{const b=e.target.closest('button');if(!b){if(e.target===m)m.remove();return}
+      if(b.dataset.p!==undefined)show(b.dataset.p);else if(b.dataset.x==='cancel')m.remove();
+      else if(b.dataset.x==='pick'){try{await post('/api/roots',{add:j.path});m.remove();toast('Location added. Press Scan to read it.');refresh()}catch(err){toast(err.message)}}}};
+  show(start||'');
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+MF.init().then(refresh).catch(e=>{$('#view').innerHTML=`<div class="panel">ManaFlow could not start: ${esc(e.message)}</div>`});
+</script>
+</body>
+</html>
