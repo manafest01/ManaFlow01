@@ -121,6 +121,7 @@ td.menu{width:34px;padding:0 6px}
 .rmenu{position:fixed;z-index:30;background:#0b1d31;border:1px solid var(--line2);border-radius:8px;padding:4px;min-width:220px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .rmenu button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:8px 10px;cursor:pointer;color:#e3f2fb}
 .rmenu button:hover{background:#12406b}.rmenu button[disabled]{opacity:.4;cursor:not-allowed}
+.rmenu a.mlink{display:block;padding:8px 10px;border-radius:6px;color:#8ff0bf;text-decoration:none}.rmenu a.mlink:hover{background:#12406b}
 .rmenu hr{border:0;border-top:1px solid var(--line2);margin:4px 0}
 .bulk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1px solid var(--cyan);background:#0a2a44;border-radius:8px;padding:6px 10px}
 .bv{display:flex;justify-content:space-between;gap:8px;padding:5px 8px 5px 18px;border-radius:6px;border:0;cursor:pointer;text-align:left;background:transparent;color:#c8e6f7;width:100%;font-size:12.5px}
@@ -202,7 +203,7 @@ let qt;$('#q').oninput=e=>{clearTimeout(qt);qt=setTimeout(()=>{S.q=e.target.valu
 function notices(){
   const out=[];const j=SUM&&SUM.job;
   if(SUM&&SUM.needsReconnect)out.push(`<div class="notice inbox"><div class="grow"><div class="h" style="color:#bfefff">Reconnect your music folders</div><div style="color:#c8ddea;font-size:12px">For your privacy the browser asks again each visit before ManaFlow can read your music.</div></div><button class="btn pri" data-act="reconnect">Reconnect</button></div>`);
-  if(SUM&&!SUM.canPick)out.push(`<div class="notice job"><div class="grow"><div class="h" style="color:#ffd38a">${IS_TOUCH?'Phone mode':'Best in Chrome or Edge on your PC'}</div><div style="color:#c8ddea;font-size:12px">${IS_TOUCH?'Phones can\'t open whole folders. Tap + Add location to pick music files; they link to your library by file name and play for this visit.':'This browser can browse your library, but only Chrome and Edge can remember your music folders, play from them and write Serato crates.'}</div></div></div>`);
+  if(SUM&&!SUM.canPick)out.push(`<div class="notice job"><div class="grow"><div class="h" style="color:#ffd38a">${IS_TOUCH?'Phone mode':'Best in Chrome or Edge on your PC'}</div><div style="color:#c8ddea;font-size:12px">${IS_TOUCH?'Phones can\'t open whole folders. Tap + Add location to pick music files (Downloads, Music or Google Drive). They link to your library by file name and stay saved on this phone.':'This browser can browse your library, but only Chrome and Edge can remember your music folders, play from them and write Serato crates.'}</div></div></div>`);
   if(SUM&&!SUM.views[0].count)out.push(`<div class="notice inbox"><div class="grow"><div class="h" style="color:#bfefff">Welcome to ManaFlow</div><div style="color:#c8ddea;font-size:12px">1. Import your rekordbox XML (rekordbox: File → Export Collection in xml format). 2. Click + Add location and pick your music folder, so tracks can play. Everything stays on this computer.</div></div><button class="btn pri" data-act="importxml">Import rekordbox XML</button><button class="btn" data-act="addroot">+ Add location</button></div>`);
   if(j&&j.running){const pct=(j.phase==='analyzing'||j.phase==='finding duplicates'||j.phase==='converting')&&j.probe_total?Math.round(100*j.probed/j.probe_total):null;
     out.push(`<div class="notice job"><div class="grow"><div class="h" style="color:#bfefff">${j.phase==='analyzing'?`Analyzing ${fmt(j.probed)} of ${fmt(j.probe_total)}`:j.phase==='finding duplicates'?`Finding duplicates… ${fmt(j.probed)} of ${fmt(j.probe_total)} checked`:j.phase==='converting'?`Converting ${fmt(j.probed)} of ${fmt(j.probe_total)}`:`Scanning… ${fmt(j.found)} audio files found`}</div>
@@ -557,7 +558,7 @@ let MENU=null;function closeMenu(){if(MENU){MENU.remove();MENU=null}}
 function openMenu(id,btn){closeMenu();const t=ROWS.find(r=>r.id===id);if(!t)return;const r=btn.getBoundingClientRect();
   const m=document.createElement('div');m.className='rmenu';m.setAttribute('role','menu');
   m.innerHTML=`<button data-mi="load" data-tid="${id}">Load on deck</button><button data-mi="play" data-tid="${id}" ${t.missing?'disabled':''}>Load and play</button><hr>
-   <button data-mi="edit" data-tid="${id}">Edit details…</button><button data-mi="copy" data-tid="${id}">Copy file path</button>
+   <button data-mi="edit" data-tid="${id}">Edit details…</button><button data-mi="copy" data-tid="${id}">Copy file path</button><a class="mlink" href="https://open.spotify.com/search/${encodeURIComponent((t.artist?t.artist+' ':'')+t.title)}" target="_blank" rel="noopener">Find on Spotify</a>${IS_TOUCH&&!t.missing?`<button data-mi="forget" data-tid="${id}">Remove saved copy from this phone</button>`:''}
    <button data-mi="xml" data-tid="${id}">Export this track to rekordbox</button>`;
   document.body.appendChild(m);const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(8,Math.min(r.right-w,innerWidth-w-8))+'px';m.style.top=(r.bottom+h+8>innerHeight?r.top-h-4:r.bottom+4)+'px';MENU=m;m.querySelector('button').focus()}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
@@ -565,6 +566,7 @@ async function menuAction(a,id){closeMenu();try{
   if(a==='load')await selectTrack(id);
   else if(a==='play'){await selectTrack(id);playAt(0)}
   else if(a==='edit')editModal([id]);
+  else if(a==='forget'){await MF.forgetFile(id);toast('Removed from this phone');refresh()}
   else if(a==='reveal')await post('/api/reveal',{id});
   else if(a==='copy'){const d=await api('/api/track/'+id);try{await navigator.clipboard.writeText(d.path);toast('File path copied')}catch(e){toast(d.path)}}
   else if(a==='xml')MF.exportRekordbox({ids:String(id)});

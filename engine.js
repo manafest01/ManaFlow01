@@ -61,7 +61,7 @@ const MF = (() => {
     if (t.duration > 1200) return 'DJ Mix/Long Recording';
     return 'Music';
   }
-  function linked(t) { return !!((t.root && t.rel && handles.has(t.root)) || fileCache.has(t.id)); }
+  function linked(t) { return !!((t.root && t.rel && handles.has(t.root)) || fileCache.has(t.id) || t.saved); }
   function hot(t) {
     const out = {};
     for (const [s, v] of Object.entries(t.rbHot || {})) out[s] = { slot: +s, pos_sec: v[0], color: v[1] || '', name: v[2] || '', source: 'rekordbox' };
@@ -87,6 +87,7 @@ const MF = (() => {
   // ---------------- files
   async function fileFor(t) {
     if (fileCache.has(t.id)) return fileCache.get(t.id);
+    if (t.saved) { try { const f = await kvGet('f:' + t.id); if (f) { fileCache.set(t.id, f); return f; } } catch (e) {} }
     const h = handles.get(t.root); if (!h || !t.rel) return null;
     if (perm.get(t.root) !== 'granted') return null;
     let d = h; const parts = t.rel.split('/');
@@ -688,7 +689,9 @@ const MF = (() => {
         if (!t) { const [a, ti] = fnameSuggest(f.name); t = { id: L.nextId++, name: f.name, ext: extOf(f.name), root: null, rel: null, size: f.size, title: ti, artist: a, genre: '', added: now().slice(0, 10), needs_probe: 1, rbHot: {}, mfHot: {}, mem: [] }; L.tracks.push(t); byId.set(t.id, t); J.new++; }
         else J.changed++;
         fileCache.set(t.id, f);
+        try { await kvSet('f:' + t.id, f); t.saved = 1; } catch (e) { J.errors++; }
       }
+      try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {}
       save(); await probeAll(list.length ? null : []);
     });
   }
@@ -750,7 +753,7 @@ const MF = (() => {
     throw new Error('not found');
   }
 
-  return { init, handle, addFiles, convert: (ids, fmt, kbps, dir) => startJob(() => convert(ids, fmt, kbps, dir)), backup, restore, hotOf: id => hot(byId.get(id) || {}), settings: () => L.settings,
+  return { init, handle, addFiles, forgetFile: async id => { const t = byId.get(id); if (t) { t.saved = 0; fileCache.delete(id); try { const d = await idb(); d.transaction('kv', 'readwrite').objectStore('kv').delete('f:' + id); } catch (e) {} save(); } }, storage: async () => { try { return await navigator.storage.estimate(); } catch (e) { return null; } }, convert: (ids, fmt, kbps, dir) => startJob(() => convert(ids, fmt, kbps, dir)), backup, restore, hotOf: id => hot(byId.get(id) || {}), settings: () => L.settings,
            tracks: () => L.tracks, linkedId: id => { const t = byId.get(id); return !!t && linked(t); }, audioURL, artURL, addFolder, addFolderFiles, reconnect, exportRekordbox, exportCSV, exportSerato, writeCrates, downloadCrates, usbScan, canPick,
            wipe: async () => { await kvSet('lib', null); location.reload(); } };
 })();
